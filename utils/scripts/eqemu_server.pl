@@ -394,6 +394,8 @@ sub build_linux_source {
 	
 	mkdir ($source_dir . "/Server/build")  if (!-e $source_dir . "/Server/build");
 	chdir ($source_dir . "/Server/build");
+	
+	print `git checkout nats`;	
 
 	print "Generating CMake build files...\n";
 	if($os_flavor eq "fedora_core"){
