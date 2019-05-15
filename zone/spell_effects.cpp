@@ -944,7 +944,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 						if(!zone->IsCity())
 						{
-							if(caster != this)
+							if(caster != this || RuleB(Character, BindCitiesOnly))
 							{
 								Message_StringID(MT_SpellFailure, CANNOT_BIND);
 								break;

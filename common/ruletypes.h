@@ -94,6 +94,7 @@ RULE_INT(Character, HasteCap, 100) // Haste cap for non-v3(overhaste) haste.
 RULE_INT(Character, SkillUpModifier, 100) //skill ups are at 100%
 RULE_BOOL(Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL(Character, BindAnywhere, false)
+RULE_BOOL(Character, BindCitiesOnly, false) // Restrict binding to cities only. Make sure to set BindAnywhere to false for this to work
 RULE_BOOL(Character, RestRegenEnabled, true) // Enable OOC Regen
 RULE_INT(Character, RestRegenTimeToActivate, 30) // Time in seconds for rest state regen to kick in.
 RULE_INT(Character, RestRegenRaidTimeToActivate, 300) // Time in seconds for rest state regen to kick in with a raid target.
