@@ -969,13 +969,19 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, message))
 			Message(0, "Error: World server disconnected");
 		}
-		else if(!RuleB(Chat, ServerWideAuction)) {
+		else 
+		{
+			if(RuleB(Chat, AuctionOnlyInCityZones) && !zone->IsCity()) {				
+				Message(0, "The auction channel is only available in cities. Try again in a city.");
+				return;
+			}
+
 			Mob *sender = this;
 
 			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, message);
+			entity_list.ChannelMessage(sender, chan_num, language, message);
 		}
 		break;
 	}

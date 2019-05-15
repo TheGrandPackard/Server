@@ -624,6 +624,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Chat)
 RULE_BOOL(Chat, ServerWideOOC, true)
 RULE_BOOL(Chat, ServerWideAuction, true)
+RULE_BOOL(Chat, AuctionOnlyInCityZones, false) // Restricts auction channel to city zones only. Disable server-wide auction for this to work.
 RULE_BOOL(Chat, EnableVoiceMacros, true)
 RULE_BOOL(Chat, EnableMailKeyIPVerification, true)
 RULE_BOOL(Chat, EnableAntiSpam, true)
