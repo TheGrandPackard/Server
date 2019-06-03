@@ -575,6 +575,14 @@ bool Mob::DoCastingChecks()
 				Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
 			return false;
 		}
+	} 
+	
+	if (RuleI(Spells, BuffTargetLevelRestrictions) != -1) {
+		if(GetLevel() - spell_target->GetLevel() >= RuleI(Spells, BuffTargetLevelRestrictions) {
+			Log(Logs::Detail, Logs::Spells, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+			return false;
+		}
 	}
 
 	if (spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()) {
