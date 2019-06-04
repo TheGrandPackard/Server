@@ -9565,12 +9565,12 @@ void command_object(Client *c, const Seperator *sep)
 			    "SELECT id, xpos, ypos, zpos, heading, itemid, "
 			    "objectname, type, icon, unknown08, unknown10, unknown20 "
 			    "FROM object WHERE zoneid = %u AND version = %u "
-				"AND min_expansion <= %i AND max_expansion >= %i "
+				"AND %i BETWEEN min_expansion AND max_expansion "
 			    "AND (xpos BETWEEN %.1f AND %.1f) "
 			    "AND (ypos BETWEEN %.1f AND %.1f) "
 			    "AND (zpos BETWEEN %.1f AND %.1f) "
 			    "ORDER BY id",
-			    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion,
+			    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion,
 			    c->GetX() - radius, // Yes, we're actually using a bounding box instead of a radius.
 			    c->GetX() + radius, // Much less processing power used this way.
 			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius);
@@ -9578,9 +9578,9 @@ void command_object(Client *c, const Seperator *sep)
 			query = StringFormat("SELECT id, xpos, ypos, zpos, heading, itemid, "
 					     "objectname, type, icon, unknown08, unknown10, unknown20 "
 					     "FROM object WHERE zoneid = %u AND version = %u "
-						 "AND min_expansion <= %i AND max_expansion >= %i "
+						 "AND %i BETWEEN min_expansion AND max_expansion "
 					     "ORDER BY id",
-					     zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion);
+					     zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion);
 
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
@@ -9732,10 +9732,10 @@ void command_object(Client *c, const Seperator *sep)
 		query = StringFormat(
 		    "SELECT COUNT(*) FROM object WHERE zoneid = %u "
 		    "AND version=%u AND (xpos BETWEEN %.1f AND %.1f) "
-			"AND min_expansion <= %i AND max_expansion >= %i) "
+			"AND %i BETWEEN min_expansion AND max_expansion) "
 		    "AND (ypos BETWEEN %.1f AND %.1f) "
 		    "AND (zpos BETWEEN %.1f AND %.1f)",
-		    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion,
+		    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion,
 			od.x - 0.2f,
 		    od.x + 0.2f,	       // Yes, we're actually using a bounding box instead of a radius.
 		    od.y - 0.2f, od.y + 0.2f,  // Much less processing power used this way.

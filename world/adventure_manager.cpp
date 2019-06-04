@@ -638,7 +638,7 @@ bool AdventureManager::LoadAdventureTemplates()
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
 		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
 		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
+		"graveyard_radius FROM adventure_template WHERE %i BETWEEN min_expansion AND max_expansion", latest_expansion);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
 		return false;

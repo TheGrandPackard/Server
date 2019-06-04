@@ -1141,11 +1141,11 @@ bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_
                                     "FROM tradeskill_recipe_entries AS tre "
                                     "INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
                                     "WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
-									"AND min_expansion <= %i AND max_expansion >= %i "
+									"AND %i BETWEEN min_expansion AND max_expansion "
                                     "OR ( tre.item_id %s AND tre.iscontainer=1 ))"
                                     "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
                                     "AND sum(tre.item_id * tre.componentcount) = %u",
-                                    buf2.c_str(), containers.c_str(), count, sum, latest_expansion, latest_expansion);
+                                    buf2.c_str(), latest_expansion, containers.c_str(), count, sum);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error in GetTradeRecipe search, query: %s", query.c_str());

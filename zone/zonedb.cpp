@@ -2368,8 +2368,8 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		where_condition = StringFormat(
 			"INNER JOIN spawnentry ON npc_types.id = spawnentry.npcID "
 			"INNER JOIN spawn2 ON spawnentry.spawngroupID = spawn2.spawngroupID "
-			"WHERE spawn2.zone = '%s' and spawn2.version = %u AND min_expansion <= %i AND max_expansion >= %i "
-			"GROUP BY npc_types.id", zone->GetShortName(), zone->GetInstanceVersion(), latest_expansion, latest_expansion);
+			"WHERE spawn2.zone = '%s' and spawn2.version = %u AND %i BETWEEN min_expansion AND max_expansion "
+			"GROUP BY npc_types.id", zone->GetShortName(), zone->GetInstanceVersion(), latest_expansion);
 	}
 	else{
 		where_condition = StringFormat("WHERE id = %u", npc_type_id);
@@ -3292,9 +3292,9 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT timezone FROM zone WHERE zoneidnumber = %i "
-                                    "AND (version = %i OR version = 0)  AND min_expansion <= %i AND max_expansion >= %i "
+                                    "AND (version = %i OR version = 0)  AND %i BETWEEN min_expansion AND max_expansion "
 									"ORDER BY version DESC",
-                                    zoneid, version, latest_expansion, latest_expansion);
+                                    zoneid, version, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return 0;
@@ -3312,8 +3312,8 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("UPDATE zone SET timezone = %i "
                                     "WHERE zoneidnumber = %i AND version = %i "
-									"AND min_expansion <= %i AND max_expansion >= %i",
-                                    tz, zoneid, version, latest_expansion, latest_expansion);
+									"AND %i BETWEEN min_expansion AND max_expansion",
+                                    tz, zoneid, version, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return false;

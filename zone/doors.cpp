@@ -611,8 +611,8 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT MAX(id), count(*) FROM doors "
                                     "WHERE zone = '%s' AND (version = %u OR version = -1) "
-									"AND min_expansion <= %i AND max_expansion >= %i",
-                                    zone_name, version, latest_expansion, latest_expansion);
+									"AND %i BETWEEN min_expansion AND max_expansion",
+                                    zone_name, version, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return -1;
@@ -639,7 +639,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 	auto latest_expansion = RuleI(World, LatestExpansion);
     std::string query = StringFormat(
     		"SELECT MAX(id) FROM doors WHERE zone = '%s' AND version = %u "
-			"AND min_expansion <= %i AND max_expansion >= %i",
+			"AND %i BETWEEN min_expansion AND max_expansion",
 		    zone_name,
 		    version,
 			latest_expansion,
@@ -667,8 +667,8 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	 std::string query = StringFormat("SELECT MAX(doorid) FROM doors "
                                     "WHERE zone = '%s' AND (version = %u OR version = -1) "
-	  			    " AND min_expansion <= %i AND max_expansion >= %i",
-                                    zone_name, version, latest_expansion, latest_expansion);
+	  			    " AND %i BETWEEN min_expansion AND max_expansion",
+                                    zone_name, version, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return -1;
@@ -724,7 +724,7 @@ bool ZoneDatabase::LoadDoors(int32 door_count, Door *into, const char *zone_name
 			" WHERE "
 			" 	zone = '%s'  "
 			" 	AND ( version = % u OR version = - 1 )  "
-			"   AND min_expansion <= %i AND max_expansion >= %i "
+			"   AND %i BETWEEN min_expansion AND max_expansion "
 			" ORDER BY "
 			" 	doorid ASC ",
 			zone_name,

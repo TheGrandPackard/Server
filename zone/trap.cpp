@@ -403,7 +403,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
 		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u "
-		"AND min_expansion <= %i AND max_expansion >= %i", zonename, version, latest_expansion, latest_expansion);
+		"AND %i BETWEEN min_expansion AND max_expansion", zonename, version, latest_expansion);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -489,8 +489,8 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
 			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' "
-			"AND `group`=%d AND id != %d AND min_expansion <= %i AND max_expansion >= %i"
-			"ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid, latest_expansion, latest_expansion);
+			"AND `group`=%d AND id != %d AND %i BETWEEN min_expansion AND max_expansion "
+			"ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid, latest_expansion);
 	}
 	else
 	{
@@ -498,7 +498,7 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
 			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' "
-			"AND id = %d AND min_expansion <= %i AND max_expansion >= %i", zone->GetShortName(), dbid, latest_expansion, latest_expansion);
+			"AND id = %d AND %i BETWEEN min_expansion AND max_expansion", zone->GetShortName(), dbid, latest_expansion);
 	}
 
 	auto results = QueryDatabase(query);

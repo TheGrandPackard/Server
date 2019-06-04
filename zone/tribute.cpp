@@ -389,7 +389,7 @@ bool ZoneDatabase::LoadTributes() {
 
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	const std::string query = StringFormat("SELECT id, name, descr, unknown, isguild FROM tributes "
-		"WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
+		"WHERE %i BETWEEN min_expansion AND max_expansion", latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

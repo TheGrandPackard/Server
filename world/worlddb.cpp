@@ -92,8 +92,6 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 	cs->CharCount = character_count;
 	cs->TotalChars = character_limit;
 	
-	auto latest_expansion = RuleI(World, LatestExpansion);
-
 	buff_ptr += sizeof(CharacterSelect_Struct);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
@@ -185,8 +183,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		}
 
 		if (has_home == 0 || has_bind == 0) {
+			auto latest_expansion = RuleI(World, LatestExpansion);
 			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i "
-				"AND min_expansion <= %i AND max_expansion >= %i", cse->Class, cse->Deity, cse->Race, latest_expansion, latest_expansion);
+				"AND %i BETWEEN min_expansion AND max_expansion", cse->Class, cse->Deity, cse->Race, latest_expansion);
 			auto results_bind = database.QueryDatabase(cquery);
 			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
@@ -362,8 +361,8 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
 	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
-		"AND player_class = %i AND player_deity = %i AND player_race = %i AND min_expansion <= %i AND max_expansion >= %i",
-		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race, latest_expansion, latest_expansion);
+		"AND player_class = %i AND player_deity = %i AND player_race = %i AND %i BETWEEN min_expansion AND max_expansion",
+		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race, latest_expansion);
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
 		return false;

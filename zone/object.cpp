@@ -701,8 +701,8 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
                                     "item, max_allowed, respawn_timer "
                                     "FROM ground_spawns "
                                     "WHERE zoneid = %i AND (version = %u OR version = -1) "
-									"AND min_expansion <= %i AND max_expansion >= %i "
-                                    "LIMIT 50", zone_id, version, latest_expansion, latest_expansion);
+									"AND %i BETWEEN min_expansion AND max_expansion "
+                                    "LIMIT 50", zone_id, version, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return gs;

@@ -11766,12 +11766,12 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 		"WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
 		"WHERE tr.enabled <> 0 AND tr.id IN (%s) "
 		"AND tr.must_learn & 0x20 <> 0x20 AND "
-		"AND min_expansion <= %i AND max_expansion >= %i "
+		"AND %i BETWEEN min_expansion AND max_expansion "
 		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
 		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots, latest_expansion, latest_expansion);
+		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots, latest_expansion);
 
 	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 	return;
@@ -11835,13 +11835,13 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		"AND tr.must_learn & 0x20 <> 0x20 "
 		"AND ((tr.must_learn & 0x3 <> 0 "
 		"AND crl.madecount IS NOT NULL) "
-		"AND min_expansion <= %i AND max_expansion >= %i"
+		"AND %i BETWEEN min_expansion AND max_expansion"
 		"OR (tr.must_learn & 0x3 = 0)) "
 		"GROUP BY tr.id "
 		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
 		"LIMIT 200 ",
 		CharacterID(), searchClause.c_str(),
-		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots, latest_expansion, latest_expansion);
+		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots, latest_expansion);
 	TradeskillSearchResults(query, rss->object_type, rss->some_id);
 	return;
 }
@@ -12311,8 +12311,8 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND min_expansion <= %i AND max_expansion >= %i",
-		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion, latest_expansion);
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i BETWEEN min_expansion AND max_expansion",
+		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "No valid start zones found for /setstartcity");
@@ -12342,8 +12342,8 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	}
 
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND min_expansion <= %i AND max_expansion >= %i",
-		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion, latest_expansion);
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND %i BETWEEN min_expansion AND max_expansion",
+		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion);
 	results = database.QueryDatabase(query);
 	if (!results.Success())
 		return;

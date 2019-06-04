@@ -148,8 +148,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 					 "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
 					 "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
 					 "AND spawn2.version = %u and zone = '%s' "
-					 "AND min_expansion <= %i AND max_expansion >= %i",
-					 version, zone_name);
+					 "AND %i BETWEEN min_expansion AND max_expansion",
+					 version, zone_name, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -167,9 +167,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			     "FROM spawnentry, spawn2, npc_types "
 			     "WHERE spawnentry.npcID=npc_types.id "
 			     "AND spawnentry.spawngroupID = spawn2.spawngroupID "
-				 "AND min_expansion <= %i AND max_expansion >= %i "
-			     "AND zone = '%s'",
-			     latest_expansion, latest_expansion, zone_name);
+			     "AND zone = '%s' ",
+				 "AND %i BETWEEN min_expansion AND max_expansion"
+			     zone_name, latest_expansion);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());

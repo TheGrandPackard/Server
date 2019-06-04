@@ -489,10 +489,9 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND %i BETWEEN min_expansion AND max_expansion",
 		zone_name,
 		version,
-		latest_expansion,
 		latest_expansion
 		);
 	results = QueryDatabase(query);
@@ -596,10 +595,9 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND %i BETWEEN min_expansion AND max_expansion",
 		zone_name,
 		version,
-		latest_expansion,
 		latest_expansion
 	);
 	results = QueryDatabase(query);
