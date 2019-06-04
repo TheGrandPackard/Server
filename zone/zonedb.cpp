@@ -2364,10 +2364,12 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	if (bulk_load){
 		Log(Logs::General, Logs::Debug, "Performing bulk NPC Types load");
+		auto latest_expansion = RuleI(World, LatestExpansion);
 		where_condition = StringFormat(
 			"INNER JOIN spawnentry ON npc_types.id = spawnentry.npcID "
 			"INNER JOIN spawn2 ON spawnentry.spawngroupID = spawn2.spawngroupID "
-			"WHERE spawn2.zone = '%s' and spawn2.version = %u GROUP BY npc_types.id", zone->GetShortName(), zone->GetInstanceVersion());
+			"WHERE spawn2.zone = '%s' and spawn2.version = %u AND min_expansion <= %i AND max_expansion >= %i "
+			"GROUP BY npc_types.id", zone->GetShortName(), zone->GetInstanceVersion(), latest_expansion, latest_expansion);
 	}
 	else{
 		where_condition = StringFormat("WHERE id = %u", npc_type_id);
@@ -3288,9 +3290,11 @@ uint8 ZoneDatabase::GetUseCFGSafeCoords()
 //New functions for timezone
 uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT timezone FROM zone WHERE zoneidnumber = %i "
-                                    "AND (version = %i OR version = 0) ORDER BY version DESC",
-                                    zoneid, version);
+                                    "AND (version = %i OR version = 0)  AND min_expansion <= %i AND max_expansion >= %i "
+									"ORDER BY version DESC",
+                                    zoneid, version, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return 0;
@@ -3305,9 +3309,11 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 
 bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("UPDATE zone SET timezone = %i "
-                                    "WHERE zoneidnumber = %i AND version = %i",
-                                    tz, zoneid, version);
+                                    "WHERE zoneidnumber = %i AND version = %i "
+									"AND min_expansion <= %i AND max_expansion >= %i",
+                                    tz, zoneid, version, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return false;
@@ -3525,14 +3531,16 @@ void ZoneDatabase::QGlobalPurge()
 
 void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize, bool ddisabletimer){
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("REPLACE INTO doors (id, doorid, zone, version, name, "
                                     "pos_x, pos_y, pos_z, heading, opentype, guild, lockpick, "
-                                    "keyitem, disable_timer, door_param, invert_state, incline, size) "
+                                    "keyitem, disable_timer, door_param, invert_state, incline, size, min_expansion, max_expansion) "
                                     "VALUES('%i', '%i', '%s', '%i', '%s', '%f', '%f', "
                                     "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
                                     ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
                                     ddoor_name, position.x, position.y, position.z, position.w,
-									dopentype, dguildid, dlockpick, dkeyitem, (ddisabletimer ? 1 : 0), ddoor_param, dinvert, dincline, dsize);
+									dopentype, dguildid, dlockpick, dkeyitem, (ddisabletimer ? 1 : 0), ddoor_param, dinvert, dincline, dsize,
+									latest_expansion, latest_expansion);
     QueryDatabase(query);
 }
 

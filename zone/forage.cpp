@@ -54,9 +54,11 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
+	auto latest_expansion = RuleI(World, LatestExpansion);
     std::string query = StringFormat("SELECT itemid, chance FROM "
                                     "forage WHERE zoneid = '%i' and level <= '%i' "
-                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+									"AND min_expansion <= %i AND max_expansion >= %i "
+                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -109,9 +111,11 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
     std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
-                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i'",
-                                    ZoneID, skill);
+                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i' "
+									"AND min_expansion <= %i AND max_expansion >= %i",
+                                    ZoneID, skill, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return 0;

@@ -608,9 +608,11 @@ void Doors::ToggleState(Mob *sender)
 
 int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version) {
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT MAX(id), count(*) FROM doors "
-                                    "WHERE zone = '%s' AND (version = %u OR version = -1)",
-                                    zone_name, version);
+                                    "WHERE zone = '%s' AND (version = %u OR version = -1) "
+									"AND min_expansion <= %i AND max_expansion >= %i",
+                                    zone_name, version, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return -1;
@@ -634,10 +636,14 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 }
 
 int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
+	auto latest_expansion = RuleI(World, LatestExpansion);
     std::string query = StringFormat(
-    		"SELECT MAX(id) FROM doors WHERE zone = '%s' AND version = %u",
+    		"SELECT MAX(id) FROM doors WHERE zone = '%s' AND version = %u "
+			"AND min_expansion <= %i AND max_expansion >= %i",
 		    zone_name,
-		    version
+		    version,
+			latest_expansion,
+			latest_expansion
     );
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -660,8 +666,9 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 	uint32 oMaxID = 0;
 
     std::string query = StringFormat("SELECT MAX(doorid) FROM doors "
-                                    "WHERE zone = '%s' AND (version = %u OR version = -1)",
-                                    zone_name, version);
+                                    "WHERE zone = '%s' AND (version = %u OR version = -1) "
+									" AND min_expansion <= %i AND max_expansion >= %i",
+                                    zone_name, version, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return -1;
@@ -681,6 +688,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 bool ZoneDatabase::LoadDoors(int32 door_count, Door *into, const char *zone_name, int16 version) {
 	Log(Logs::General, Logs::Status, "Loading Doors from database...");
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat(
 			" SELECT "
 			" 	id, "
@@ -716,10 +724,13 @@ bool ZoneDatabase::LoadDoors(int32 door_count, Door *into, const char *zone_name
 			" WHERE "
 			" 	zone = '%s'  "
 			" 	AND ( version = % u OR version = - 1 )  "
+			"   AND min_expansion <= %i AND max_expansion >= %i "
 			" ORDER BY "
 			" 	doorid ASC ",
 			zone_name,
-			version
+			version,
+			latest_expansion,
+			latest_expansion
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {

@@ -337,17 +337,18 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if(record.monsterflag) {
 
 		uint32 monsterid = 0;
+		auto latest_expansion = RuleI(World, LatestExpansion);
 
 		// get a random npc id from the spawngroups assigned to this zone
 		auto query = StringFormat("SELECT npcID "
-									"FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
+									"FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID AND min_expansion <= %i AND max_expansion >= %i) "
 									"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
 									"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
 									"AND npc_types.race NOT IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 44, "
 									"55, 67, 71, 72, 73, 77, 78, 81, 90, 92, 93, 94, 106, 112, 114, 127, 128, "
 									"130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
 									"380, 381, 382, 383, 404, 522) "
-									"ORDER BY RAND() LIMIT 1", zone->GetShortName());
+									"ORDER BY RAND() LIMIT 1", latest_expansion, latest_expansion, zone->GetShortName());
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
 			safe_delete(npc_type);

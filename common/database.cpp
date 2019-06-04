@@ -933,8 +933,10 @@ uint32 Database::GetMiniLoginAccount(char* ip)
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
 	
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed FROM zone "
-		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
+		" WHERE short_name='%s' AND (version=%i OR version=0) AND min_expansion <= %i AND max_expansion >= %i ORDER BY version DESC", 
+		short_name, version, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -1043,7 +1045,8 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 bool Database::LoadZoneNames() {
-	std::string query("SELECT zoneidnumber, short_name FROM zone");
+	auto latest_expansion = RuleI(World, LatestExpansion);
+	std::string query = StringFormat("SELECT zoneidnumber, short_name FROM zone WHERE min_expansion <= %i AND max_expansion >= %i", latest_expansion, latest_expansion);
 
 	auto results = QueryDatabase(query);
 

@@ -141,12 +141,14 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 
 bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnGroupList *spawn_group_list)
 {
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, "
 					 "spawngroup.dist, spawngroup.max_x, spawngroup.min_x, "
 					 "spawngroup.max_y, spawngroup.min_y, spawngroup.delay, "
 					 "spawngroup.despawn, spawngroup.despawn_timer, spawngroup.mindelay "
 					 "FROM spawn2, spawngroup WHERE spawn2.spawngroupID = spawngroup.ID "
-					 "AND spawn2.version = %u and zone = '%s'",
+					 "AND spawn2.version = %u and zone = '%s' "
+					 "AND min_expansion <= %i AND max_expansion >= %i",
 					 version, zone_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -165,8 +167,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			     "FROM spawnentry, spawn2, npc_types "
 			     "WHERE spawnentry.npcID=npc_types.id "
 			     "AND spawnentry.spawngroupID = spawn2.spawngroupID "
+				 "AND min_expansion <= %i AND max_expansion >= %i "
 			     "AND zone = '%s'",
-			     zone_name);
+			     latest_expansion, latest_expansion, zone_name);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());

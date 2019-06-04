@@ -1267,10 +1267,11 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 	spawn->SetSp2(spawngroupid);
 	spawn->SetNPCTypeID(npc_type_id);
 
-	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+	auto latest_expansion = RuleI(World, LatestExpansion);
+	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID, min_expansion, max_expansion) "
+			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i, %i, %i)",
 			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(),
-			     spawngroupid);
+			     spawngroupid, latest_expansion, latest_expansion);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -1308,10 +1309,11 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_ve
 	else
 		respawntime = 1200;
 
-	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+	auto latest_expansion = RuleI(World, LatestExpansion);
+	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID, min_expansion, max_expansion) "
+			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i, %i, %i)",
 			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime,
-			     spawn->GetHeading(), last_insert_id);
+			     spawn->GetHeading(), last_insert_id, latest_expansion, latest_expansion);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -1433,11 +1435,12 @@ uint32 ZoneDatabase::AddSpawnFromSpawnGroup(const char *zone, uint32 zone_versio
 					    uint32 spawnGroupID)
 {
 	uint32 last_insert_id = 0;
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query =
-	    StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			 "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
+	    StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID, min_expansion, max_expansion) "
+			 "VALUES('%s', %u, %f, %f, %f, %i, %f, %i, %i, %i)",
 			 zone, zone_version, client->GetX(), client->GetY(), client->GetZ(), 120, client->GetHeading(),
-			 spawnGroupID);
+			 spawnGroupID, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;

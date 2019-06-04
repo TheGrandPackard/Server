@@ -471,6 +471,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 	}
 
 	const char *zone_name = database.GetZoneName(zoneid);
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat(
 		"SELECT "
 		"id, "
@@ -488,9 +489,11 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1) ",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
 		zone_name,
-		version
+		version,
+		latest_expansion,
+		latest_expansion
 		);
 	results = QueryDatabase(query);
 
@@ -575,6 +578,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	}
 
 	const char *zone_name = database.GetZoneName(zoneid);
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat(
 		"SELECT "
 		"id, "
@@ -592,9 +596,11 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1)",
+		"WHERE zone = '%s' AND  (version = %u OR version = -1) AND min_expansion <= %i AND max_expansion >= %i",
 		zone_name,
-		version
+		version,
+		latest_expansion,
+		latest_expansion
 	);
 	results = QueryDatabase(query);
 
@@ -667,12 +673,12 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 
 bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
 {
-
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("INSERT INTO spawn2 (spawngroupID, zone, x, y, z, heading, "
-                                    "respawntime, variance, _condition, cond_value) "
-                                    "VALUES (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
+                                    "respawntime, variance, _condition, cond_value, min_expansion, max_expansion) "
+                                    "VALUES (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i, %i, %i)",
                                     spawngroup, zone, position.x, position.y, position.z, position.w,
-                                    respawn, variance, condition, cond_value);
+                                    respawn, variance, condition, cond_value, latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return false;

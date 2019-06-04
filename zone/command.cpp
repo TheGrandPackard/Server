@@ -9532,6 +9532,8 @@ void command_object(Client *c, const Seperator *sep)
 	float x2;
 	float y2;
 
+	auto latest_expansion = RuleI(World, LatestExpansion);
+
 	// Temporary object type for static objects to allow manipulation
 	// NOTE: Zone::LoadZoneObjects() currently loads this as an uint8, so max value is 255!
 	static const uint32 staticType = 255;
@@ -9563,11 +9565,12 @@ void command_object(Client *c, const Seperator *sep)
 			    "SELECT id, xpos, ypos, zpos, heading, itemid, "
 			    "objectname, type, icon, unknown08, unknown10, unknown20 "
 			    "FROM object WHERE zoneid = %u AND version = %u "
+				"AND min_expansion <= %i AND max_expansion >= %i "
 			    "AND (xpos BETWEEN %.1f AND %.1f) "
 			    "AND (ypos BETWEEN %.1f AND %.1f) "
 			    "AND (zpos BETWEEN %.1f AND %.1f) "
 			    "ORDER BY id",
-			    zone->GetZoneID(), zone->GetInstanceVersion(),
+			    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion,
 			    c->GetX() - radius, // Yes, we're actually using a bounding box instead of a radius.
 			    c->GetX() + radius, // Much less processing power used this way.
 			    c->GetY() - radius, c->GetY() + radius, c->GetZ() - radius, c->GetZ() + radius);
@@ -9575,8 +9578,9 @@ void command_object(Client *c, const Seperator *sep)
 			query = StringFormat("SELECT id, xpos, ypos, zpos, heading, itemid, "
 					     "objectname, type, icon, unknown08, unknown10, unknown20 "
 					     "FROM object WHERE zoneid = %u AND version = %u "
+						 "AND min_expansion <= %i AND max_expansion >= %i "
 					     "ORDER BY id",
-					     zone->GetZoneID(), zone->GetInstanceVersion());
+					     zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion);
 
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
@@ -9728,9 +9732,11 @@ void command_object(Client *c, const Seperator *sep)
 		query = StringFormat(
 		    "SELECT COUNT(*) FROM object WHERE zoneid = %u "
 		    "AND version=%u AND (xpos BETWEEN %.1f AND %.1f) "
+			"AND min_expansion <= %i AND max_expansion >= %i) "
 		    "AND (ypos BETWEEN %.1f AND %.1f) "
 		    "AND (zpos BETWEEN %.1f AND %.1f)",
-		    zone->GetZoneID(), zone->GetInstanceVersion(), od.x - 0.2f,
+		    zone->GetZoneID(), zone->GetInstanceVersion(), latest_expansion, latest_expansion,
+			od.x - 0.2f,
 		    od.x + 0.2f,	       // Yes, we're actually using a bounding box instead of a radius.
 		    od.y - 0.2f, od.y + 0.2f,  // Much less processing power used this way.
 		    od.z - 0.2f, od.z + 0.2f); // It's pretty forgiving, though, allowing for close-proximity objects
@@ -10289,19 +10295,19 @@ void command_object(Client *c, const Seperator *sep)
 		else if (id == 0)
 			query = StringFormat("INSERT INTO object "
 					     "(zoneid, version, xpos, ypos, zpos, heading, objectname, "
-					     "type, icon, unknown08, unknown10, unknown20) "
-					     "VALUES (%u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u)",
+					     "type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion) "
+					     "VALUES (%u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u, %i, %i)",
 					     zone->GetZoneID(), zone->GetInstanceVersion(), od.x, od.y, od.z,
 					     od.heading, od.object_name, od.object_type, icon, od.size,
-					     od.solidtype, od.unknown020);
+					     od.solidtype, od.unknown020, latest_expansion, latest_expansion);
 		else
 			query = StringFormat("INSERT INTO object "
 					     "(id, zoneid, version, xpos, ypos, zpos, heading, objectname, "
-					     "type, icon, unknown08, unknown10, unknown20) "
-					     "VALUES (%u, %u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u)",
+					     "type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion) "
+					     "VALUES (%u, %u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u, %i, %i)",
 					     id, zone->GetZoneID(), zone->GetInstanceVersion(), od.x, od.y, od.z,
 					     od.heading, od.object_name, od.object_type, icon, od.size,
-					     od.solidtype, od.unknown020);
+					     od.solidtype, od.unknown020, latest_expansion, latest_expansion);
 
 		results = database.QueryDatabase(query);
 		if (!results.Success()) {
@@ -10430,9 +10436,9 @@ void command_object(Client *c, const Seperator *sep)
 			std::string query =
 			    StringFormat("INSERT INTO object "
 					 "(zoneid, version, xpos, ypos, zpos, heading, itemid, "
-					 "objectname, type, icon, unknown08, unknown10, unknown20) "
+					 "objectname, type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion) "
 					 "SELECT zoneid, %u, xpos, ypos, zpos, heading, itemid, "
-					 "objectname, type, icon, unknown08, unknown10, unknown20 "
+					 "objectname, type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion "
 					 "FROM object WHERE zoneid = %u) AND version = %u",
 					 od.zone_instance, zone->GetZoneID(), zone->GetInstanceVersion());
 			auto results = database.QueryDatabase(query);
@@ -10450,9 +10456,9 @@ void command_object(Client *c, const Seperator *sep)
 
 		std::string query = StringFormat("INSERT INTO object "
 						 "(zoneid, version, xpos, ypos, zpos, heading, itemid, "
-						 "objectname, type, icon, unknown08, unknown10, unknown20) "
+						 "objectname, type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion) "
 						 "SELECT zoneid, %u, xpos, ypos, zpos, heading, itemid, "
-						 "objectname, type, icon, unknown08, unknown10, unknown20 "
+						 "objectname, type, icon, unknown08, unknown10, unknown20, min_expansion, max_expansion "
 						 "FROM object WHERE id = %u AND zoneid = %u AND version = %u",
 						 od.zone_instance, id, zone->GetZoneID(), zone->GetInstanceVersion());
 		auto results = database.QueryDatabase(query);

@@ -168,11 +168,13 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query =
 	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1)",
-			 zoneid, instanceversion);
+			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1) "
+			 "AND min_expansion <= %i AND max_expansion >= %i)",
+			 zoneid, instanceversion, latest_expansion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		Log(Logs::General, Logs::Error, "Error Loading Objects from DB: %s",
@@ -419,21 +421,24 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 
 void Zone::LoadTempMerchantData() {
 	Log(Logs::General, Logs::Status, "Loading Temporary Merchant Lists...");
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat(
-		"SELECT								   "
-		"DISTINCT ml.npcid,					   "
-		"ml.slot,							   "
-		"ml.charges,						   "
-		"ml.itemid							   "
-		"FROM								   "
-		"merchantlist_temp ml,				   "
-		"spawnentry se,						   "
-		"spawn2 s2							   "
-		"WHERE								   "
-		"ml.npcid = se.npcid				   "
-		"AND se.spawngroupid = s2.spawngroupid "
-		"AND s2.zone = '%s' AND s2.version = %i "
-		"ORDER BY ml.slot					   ", GetShortName(), GetInstanceVersion());
+		"SELECT								             "
+		"DISTINCT ml.npcid,					             "
+		"ml.slot,							             "
+		"ml.charges,						             "
+		"ml.itemid							             "
+		"FROM								             "
+		"merchantlist_temp ml,				             "
+		"spawnentry se,						             "
+		"spawn2 s2							             "
+		"WHERE								             "
+		"ml.npcid = se.npcid				             "
+		"AND se.spawngroupid = s2.spawngroupid           "
+		"AND s2.zone = '%s' AND s2.version = %i          "
+		"AND min_expansion <= %i AND max_expansion >= %i "
+		"ORDER BY ml.slot					             ", 
+		GetShortName(), GetInstanceVersion(), latest_expansion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
@@ -464,8 +469,11 @@ void Zone::LoadTempMerchantData() {
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	std::list<MerchantList> merlist;
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT item, slot, faction_required, level_required, alt_currency_cost, "
-                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d ORDER BY slot", merchantid);
+                                     "classes_required, probability FROM merchantlist WHERE merchantid=%d "
+									 "AND min_expansion <= %i AND max_expansion >= %iORDER BY slot", 
+									 merchantid, latest_expansion, latest_expansion);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         return;
@@ -489,6 +497,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	Log(Logs::General, Logs::Status, "Loading Merchant Lists...");
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat(												   
 		"SELECT																		   "
 		"DISTINCT ml.merchantid,													   "
@@ -506,7 +515,9 @@ void Zone::GetMerchantDataForZoneLoad() {
 		"spawn2 AS s2																   "
 		"WHERE nt.merchant_id = ml.merchantid AND nt.id = se.npcid					   "
 		"AND se.spawngroupid = s2.spawngroupid AND s2.zone = '%s' AND s2.version = %i  "
-		"ORDER BY ml.slot															   ", GetShortName(), GetInstanceVersion());
+		"AND ml.min_expansion <= %i AND ml.max_expansion >= %i                         "
+		"ORDER BY ml.slot															   ", 
+		GetShortName(), GetInstanceVersion(), latest_expansion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	std::map<uint32, std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
@@ -1703,12 +1714,14 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
+	auto latest_expansion = RuleI(World, LatestExpansion);
 	std::string query = StringFormat("SELECT x, y, z, target_x, target_y, "
 					 "target_z, target_zone_id, heading, target_heading, "
 					 "number, target_instance, client_version_mask "
 					 "FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) "
+					 "AND min_expansion <= %i AND max_expansion >= %i "
 					 "ORDER BY number",
-					 zonename, version);
+					 zonename, version, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -2344,7 +2357,8 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
+	auto latest_expansion = RuleI(World, LatestExpansion);
+    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s' AND min_expansion <= %i AND max_expansion >= %i", GetShortName(), latest_expansion);
     auto results = database.QueryDatabase(query);
     if (!results.Success())
         return;
