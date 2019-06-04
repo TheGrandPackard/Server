@@ -168,7 +168,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			     "WHERE spawnentry.npcID=npc_types.id "
 			     "AND spawnentry.spawngroupID = spawn2.spawngroupID "
 			     "AND zone = '%s' ",
-				 "AND %i BETWEEN min_expansion AND max_expansion"
+			     "AND %i BETWEEN min_expansion AND max_expansion",
 			     zone_name, latest_expansion);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
