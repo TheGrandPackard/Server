@@ -664,10 +664,10 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version) {
 
 	uint32 oMaxID = 0;
-
-    std::string query = StringFormat("SELECT MAX(doorid) FROM doors "
+	auto latest_expansion = RuleI(World, LatestExpansion);
+	 std::string query = StringFormat("SELECT MAX(doorid) FROM doors "
                                     "WHERE zone = '%s' AND (version = %u OR version = -1) "
-									" AND min_expansion <= %i AND max_expansion >= %i",
+	  			    " AND min_expansion <= %i AND max_expansion >= %i",
                                     zone_name, version, latest_expansion, latest_expansion);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {

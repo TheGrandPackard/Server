@@ -1986,7 +1986,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	const std::string query = StringFormat("SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin, "
                             "loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
                             "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries "
-                            "ON loottable.id = loottable_entries.loottable_id AND loottable_entries.min_expansion <= %i AND loottable_entries.max_expansion >= %iORDER BY id",
+                            "ON loottable.id = loottable_entries.loottable_id AND loottable_entries.min_expansion <= %i AND loottable_entries.max_expansion >= %i ORDER BY id",
 							latest_expansion, latest_expansion);
     auto results = QueryDatabase(query);
     if (!results.Success()) {

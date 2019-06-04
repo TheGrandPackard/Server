@@ -12341,7 +12341,6 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		return;
 	}
 
-	auto latest_expansion = RuleI(World, LatestExpansion);
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
 		"WHERE player_class=%i AND player_deity=%i AND player_race=%i AND min_expansion <= %i AND max_expansion >= %i",
 		m_pp.class_, m_pp.deity, m_pp.race, latest_expansion, latest_expansion);

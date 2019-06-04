@@ -403,7 +403,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
 		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u "
-		"AND min_expansion <= %i AND max_expansion >= %i", zonename, versio, latest_expansion, latest_expansion);
+		"AND min_expansion <= %i AND max_expansion >= %i", zonename, version, latest_expansion, latest_expansion);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
