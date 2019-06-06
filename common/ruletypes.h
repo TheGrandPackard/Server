@@ -233,7 +233,7 @@ RULE_INT(World, SoFStartZoneID, -1) //Sets the Starting Zone for SoF Clients sep
 RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium Clients (-1 is disabled). Replaces the old method.
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
 RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
-RULE_INT(World, LatestExpansion, 99) // Sets the latest expansion for determining what content from the database and quest scripts will be used at runtime. 99 Will load latest content
+RULE_INT(World, LatestExpansion, 0) // Sets the latest expansion for determining what content from the database and quest scripts will be used at runtime. 99 Will load latest content
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_INT(World, PVPMinLevel, 0) // minimum level to pvp
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)

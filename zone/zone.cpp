@@ -173,7 +173,7 @@ bool Zone::LoadZoneObjects()
 	    StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
 			 "unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
 			 "FROM object WHERE zoneid = %i AND (version = %u OR version = -1) "
-			 "AND %i BETWEEN min_expansion AND max_expansion)",
+			 "AND %i BETWEEN min_expansion AND max_expansion",
 			 zoneid, instanceversion, latest_expansion);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
